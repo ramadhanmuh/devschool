@@ -1,14 +1,26 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import axios from 'axios';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      members: [{}, {}, {}, {}]
+      members: []
     };
   }
+
+  componentDidMount() {
+    axios.get('https://reqres.in/api/users?page=1')
+      .then(response => {
+        this.setState({ members: response.data.data })
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
   render() {
     return (
       <div className='container'>
@@ -18,12 +30,13 @@ class App extends Component {
             <h2>Member</h2>
             <div className='row'>
               {this.state.members.map((member, index) => 
-                <div className='col-md-6'>
+                <div className='col-md-6'
+                  key={member.id}>
                   <div className='card' style={{margin: 10}}>
                     <div className='card-body'>
-                      <h5 className='card-title'>ID Member</h5>
-                      <h5 className='card-title'>First Name</h5>
-                      <h5 className='card-title'>Last Name</h5>
+                      <h5 className='card-title'>{member.id}</h5>
+                      <h5 className='card-title'>{member.first_name}</h5>
+                      <h5 className='card-title'>{member.last_name}</h5>
                       <button className='btn btn-primary'>
                         Edit
                       </button>
