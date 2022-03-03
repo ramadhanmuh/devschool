@@ -7,7 +7,10 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      members: []
+      members: [],
+      first_name: '',
+      last_name: '',
+      buttonDisabled: false
     };
   }
 
@@ -15,6 +18,38 @@ class App extends Component {
     axios.get('https://reqres.in/api/users?page=1')
       .then(response => {
         this.setState({ members: response.data.data })
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
+  inputOnChangeHandler = event => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+
+  onSubmitHandler = event => {
+    console.log('Form telah di submit');
+    event.preventDefault();
+
+    this.setState({buttonDisabled: true});
+
+    var payload = {
+      first_name: this.state.first_name,
+      last_name: this.state.last_name
+    };
+
+    var url = "https://reqres.in/api/users";
+
+    axios.post(url, payload)
+      .then(response => {
+        console.log(response);
+
+        var members = [...this.state.members];
+
+        members.push(response.data);
+
+        this.setState({ members, buttonDisabled: false, first_name: '', last_name: '' });
       })
       .catch(error => {
         console.log(error)
@@ -51,16 +86,26 @@ class App extends Component {
           </div>
           <div className='col-md-6 border border-dark'>
             <h2>Form</h2>
-            <form>
+            <form onSubmit={this.onSubmitHandler}>
               <div className='form-group'>
                 <label>First Name</label>
-                <input type="text" className='form-control' />
+                <input type="text"
+                  className='form-control'
+                  name='first_name'
+                  value={this.state.first_name}
+                  onChange={this.inputOnChangeHandler} />
               </div>
               <div className='form-group'>
                 <label>Last Name</label>
-                <input type="text" className='form-control' />
+                <input type="text"
+                  className='form-control'
+                  name='last_name'
+                  value={this.state.last_name}
+                  onChange={this.inputOnChangeHandler} />
               </div>
-              <button type="submit" className='btn btn-primary'>
+              <button type="submit"
+                className='btn btn-primary'
+                disabled={this.state.buttonDisabled}>
                 Submit
               </button>
             </form>
