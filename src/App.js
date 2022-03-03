@@ -96,6 +96,26 @@ class App extends Component {
       formStatus: 'edit',
       memberIdSelected: member.id
     })
+  };
+
+  deleteButtonHandler = id => {
+    var url = `https://reqres.in/api/users/${id}`;
+
+    axios.delete(url)
+      .then(response => {
+        if (response.status === 204) {
+          var members = [...this.state.members];
+
+          var index = members.findIndex(member => member.id === id);
+
+          members.splice(index, 1);
+
+          this.setState({ members });
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      })
   }
 
   render() {
@@ -118,7 +138,8 @@ class App extends Component {
                         onClick={() => this.editButtonHandler(member)}>
                         Edit
                       </button>
-                      <button className='btn btn-danger'>
+                      <button className='btn btn-danger'
+                        onClick={() => this.deleteButtonHandler(member.id)}>
                         Delete
                       </button>
                     </div>
