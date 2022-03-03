@@ -10,7 +10,9 @@ class App extends Component {
       members: [],
       first_name: '',
       last_name: '',
-      buttonDisabled: false
+      buttonDisabled: false,
+      formStatus: 'create',
+      memberIdSelected: null
     };
   }
 
@@ -39,8 +41,17 @@ class App extends Component {
       last_name: this.state.last_name
     };
 
-    var url = "https://reqres.in/api/users";
+    var url = '';
+    if (this.state.formStatus === 'create') {
+      url = "https://reqres.in/api/users";
+      this.addMember(url, payload);
+    } else {
+      url = `https://reqres.in/api/users/${this.state.memberIdSelected}`
+      this.editMember(url, payload);
+    }
+  }
 
+  addMember = (url, payload) => {
     axios.post(url, payload)
       .then(response => {
         console.log(response);
@@ -53,7 +64,38 @@ class App extends Component {
       })
       .catch(error => {
         console.log(error)
-      })
+      });
+  };
+
+  editMember = (url, payload) => {
+    axios.put(url, payload)
+      .then(response => {
+        var members = [...this.state.members];
+
+        var indexmember = members.findIndex(member => member.id === this.state.memberIdSelected);
+
+        members[indexmember].first_name = response.data.first_name;
+        members[indexmember].last_name = response.data.last_name;
+
+        this.setState({
+          members,
+          buttonDisabled: false,
+          first_name: '',
+          last_name: '',
+          formStatus: 'create'
+        });
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  editButtonHandler = member => {
+    this.setState({
+      first_name: member.first_name,
+      last_name: member.last_name,
+      formStatus: 'edit',
+      memberIdSelected: member.id
+    })
   }
 
   render() {
@@ -72,7 +114,8 @@ class App extends Component {
                       <h5 className='card-title'>{member.id}</h5>
                       <h5 className='card-title'>{member.first_name}</h5>
                       <h5 className='card-title'>{member.last_name}</h5>
-                      <button className='btn btn-primary'>
+                      <button className='btn btn-primary'
+                        onClick={() => this.editButtonHandler(member)}>
                         Edit
                       </button>
                       <button className='btn btn-danger'>
@@ -85,7 +128,7 @@ class App extends Component {
             </div>
           </div>
           <div className='col-md-6 border border-dark'>
-            <h2>Form</h2>
+            <h2>Form {this.state.formStatus}</h2>
             <form onSubmit={this.onSubmitHandler}>
               <div className='form-group'>
                 <label>First Name</label>
